@@ -41,5 +41,5 @@ pub fn run() {
             settings::save_settings,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running MirrorPy");
+        .expect("error while running Mirror-Rust");
 }

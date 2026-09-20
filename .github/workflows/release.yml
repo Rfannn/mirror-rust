@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v1.0.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      # adb and scrcpy live in the Python repo, so pull them in before building.
+      - name: Fetch scrcpy binaries
+        shell: bash
+        run: |
+          mkdir -p src-tauri/resources
+          base=https://raw.githubusercontent.com/Rfannn/mirrorpy/main
+          for file in adb.exe scrcpy.exe scrcpy-server AdbWinApi.dll AdbWinUsbApi.dll \
+                      SDL2.dll avcodec-61.dll avformat-61.dll avutil-59.dll \
+                      swresample-5.dll libusb-1.0.dll; do
+            curl -sSL -o "src-tauri/resources/$file" "$base/$file" || echo "missing $file"
+          done
+
+      - name: Lint
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  build:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="${{ github.event.inputs.tag }}"
+          else
+            tag="${{ github.ref_name }}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "number=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag"
+
+      - name: Fetch scrcpy binaries
+        shell: bash
+        run: |
+          mkdir -p src-tauri/resources
+          base=https://raw.githubusercontent.com/Rfannn/mirrorpy/main
+          for file in adb.exe scrcpy.exe scrcpy-server AdbWinApi.dll AdbWinUsbApi.dll \
+                      SDL2.dll avcodec-61.dll avformat-61.dll avutil-59.dll \
+                      swresample-5.dll libusb-1.0.dll; do
+            curl -sSL -o "src-tauri/resources/$file" "$base/$file" || echo "missing $file"
+          done
+
+      - name: Build installer
+        run: cargo tauri build --bundles nsis
+
+      # The bare exe needs its sibling resources folder, so ship them zipped
+      # together as a portable build. Cargo emits the binary in lowercase.
+      - name: Assemble portable build
+        shell: bash
+        run: |
+          version="${{ steps.version.outputs.number }}"
+          mkdir -p staging/Mirror-Rust/resources
+          cp src-tauri/target/release/mirror-rust.exe staging/Mirror-Rust/Mirror-Rust.exe
+          cp src-tauri/target/release/resources/* staging/Mirror-Rust/resources/
+          powershell -NoProfile -Command "Compress-Archive -Path 'staging\Mirror-Rust' -DestinationPath 'Mirror-Rust-${version}-windows-portable.zip' -Force"
+          ls -la Mirror-Rust-*.zip
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mirror-Rust-${{ steps.version.outputs.number }}
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            Mirror-Rust-*.zip
+          retention-days: 30
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Mirror-Rust ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          files: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            Mirror-Rust-*.zip

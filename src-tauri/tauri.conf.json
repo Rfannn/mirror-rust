@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "MirrorPy",
+  "productName": "Mirror-Rust",
   "version": "1.0.0",
-  "identifier": "com.rfannn.mirrorpy",
+  "identifier": "com.rfannn.mirrorrust",
   "build": {
     "frontendDist": "../src"
   },
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "MirrorPy",
+        "title": "Mirror-Rust",
         "width": 1080,
         "height": 720,
         "minWidth": 900,

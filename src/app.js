@@ -449,7 +449,7 @@ async function start() {
   await loadSettings();
   await loadEnvironment();
   renderDevice();
-  log('MirrorPy ready');
+  log('Mirror-Rust ready');
   if (state.settings.auto_connect) {
     log('Auto-connect is on, looking for a device…');
     detect();

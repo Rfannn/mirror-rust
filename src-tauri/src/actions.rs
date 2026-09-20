@@ -75,7 +75,7 @@ pub fn send_clipboard(app: AppHandle, serial: String, text: String) -> Result<()
     let adb = tool(&app, "adb");
     let local = crate::tools::data_dir(&app).join("clipboard.txt");
     std::fs::write(&local, text.as_bytes()).map_err(|e| e.to_string())?;
-    let remote = "/sdcard/mirrorpy_clipboard.txt";
+    let remote = "/sdcard/mirror_rust_clipboard.txt";
 
     let (_, err, ok) = run(
         &adb,

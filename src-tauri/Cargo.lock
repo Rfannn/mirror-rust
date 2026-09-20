@@ -2086,7 +2086,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mirrorpy"
+name = "mirror-rust"
 version = "1.0.0"
 dependencies = [
  "base64 0.22.1",

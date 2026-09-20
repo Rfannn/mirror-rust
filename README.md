@@ -1,4 +1,4 @@
-# MirrorPy
+# Mirror-Rust
 
 Android screen mirroring and control for the desktop, built with Tauri and powered by scrcpy.
 
@@ -65,8 +65,8 @@ src-tauri/src/             Backend
 
 Settings live in the app config directory, not the install folder:
 
-- Windows: `%APPDATA%\com.rfannn.mirrorpy\settings.json`
-- Screenshots: `%APPDATA%\com.rfannn.mirrorpy\screenshots\`
+- Windows: `%APPDATA%\com.rfannn.mirrorrust\settings.json`
+- Screenshots: `%APPDATA%\com.rfannn.mirrorrust\screenshots\`
 
 ## Quality presets
 

@@ -1,4 +1,4 @@
-use mirrorpy_lib::devices::{model_from_info, parse_devices};
+use mirror_rust_lib::devices::{model_from_info, parse_devices};
 
 #[test]
 fn parses_a_usb_device() {
