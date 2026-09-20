@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="pink">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MirrorPy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="glowfield" aria-hidden="true">
+    <span class="glow glow-a"></span>
+    <span class="glow glow-b"></span>
+    <span class="glow glow-c"></span>
+  </div>
+
+  <header class="titlebar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region>
+      <span class="brand-mark" aria-hidden="true">◎</span>
+      <span class="brand-name">MirrorPy</span>
+    </div>
+    <div class="window-controls">
+      <button class="wbtn" id="win-min" aria-label="Minimize">–</button>
+      <button class="wbtn" id="win-max" aria-label="Toggle fullscreen">□</button>
+      <button class="wbtn danger" id="win-close" aria-label="Close">✕</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" aria-label="Sections">
+      <ul class="rail">
+        <li><button class="rail-item is-active" data-page="dashboard" title="Dashboard (Ctrl+1)">
+          <span class="rail-icon" aria-hidden="true">◧</span><span class="rail-label">Dashboard</span></button></li>
+        <li><button class="rail-item" data-page="devices" title="Devices (Ctrl+2)">
+          <span class="rail-icon" aria-hidden="true">▤</span><span class="rail-label">Devices</span></button></li>
+        <li><button class="rail-item" data-page="actions" title="Quick Actions (Ctrl+3)">
+          <span class="rail-icon" aria-hidden="true">⚡</span><span class="rail-label">Quick Actions</span></button></li>
+        <li><button class="rail-item" data-page="settings" title="Settings (Ctrl+4)">
+          <span class="rail-icon" aria-hidden="true">⚙</span><span class="rail-label">Settings</span></button></li>
+        <li><button class="rail-item" data-page="logs" title="Logs (Ctrl+5)">
+          <span class="rail-icon" aria-hidden="true">≡</span><span class="rail-label">Logs</span></button></li>
+        <li><button class="rail-item" data-page="about" title="About (Ctrl+6)">
+          <span class="rail-icon" aria-hidden="true">ℹ</span><span class="rail-label">About</span></button></li>
+      </ul>
+      <button class="rail-theme" id="theme-toggle" title="Switch theme" aria-label="Switch theme">☾</button>
+    </nav>
+
+    <main class="content">
+      <!-- Dashboard -->
+      <section class="page is-active" id="page-dashboard" aria-labelledby="h-dashboard">
+        <h1 class="page-title" id="h-dashboard">Dashboard</h1>
+
+        <article class="glass panel">
+          <header class="panel-head"><h2>Device</h2><span class="badge" id="device-badge">IDLE</span></header>
+          <div class="panel-body">
+            <p class="device-name" id="device-name">No device detected</p>
+            <p class="device-addr mono" id="device-addr">—</p>
+          </div>
+        </article>
+
+        <button class="btn btn-primary btn-hero" id="quick-mirror">
+          <span aria-hidden="true">⚡</span> Quick Mirror
+        </button>
+
+        <article class="glass panel">
+          <header class="panel-head"><h2>Connection</h2></header>
+          <div class="panel-body form">
+            <label class="field">
+              <span>IP address</span>
+              <input id="ip" type="text" inputmode="decimal" placeholder="192.168.1.42" autocomplete="off" />
+            </label>
+            <label class="field narrow">
+              <span>Port</span>
+              <input id="port" type="text" inputmode="numeric" placeholder="5555" autocomplete="off" />
+            </label>
+            <div class="field actions">
+              <button class="btn" id="detect">Detect</button>
+              <button class="btn btn-cyan" id="connect">Connect</button>
+              <button class="btn" id="mirror">Mirror</button>
+              <button class="btn btn-danger" id="disconnect">Disconnect</button>
+            </div>
+          </div>
+          <div class="panel-body form sub">
+            <label class="field narrow">
+              <span>Pair port</span>
+              <input id="pair-port" type="text" inputmode="numeric" placeholder="37000" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Pairing code</span>
+              <input id="pair-code" type="text" inputmode="numeric" placeholder="123456" autocomplete="off" />
+            </label>
+            <div class="field actions">
+              <button class="btn" id="pair">Pair</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass panel">
+          <header class="panel-head"><h2>Pairing QR</h2></header>
+          <div class="panel-body qr-wrap">
+            <div class="qr-slot" id="qr-slot" role="img" aria-label="Pairing QR code">
+              <p class="muted">Detect a device to show its QR code</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="glass panel">
+          <header class="panel-head"><h2>Activity</h2><button class="btn tiny" id="clear-log">Clear</button></header>
+          <div class="panel-body"><pre class="logbox" id="activity" aria-live="polite"></pre></div>
+        </article>
+      </section>
+
+      <!-- Devices -->
+      <section class="page" id="page-devices" aria-labelledby="h-devices">
+        <h1 class="page-title" id="h-devices">Devices</h1>
+        <article class="glass panel">
+          <header class="panel-head">
+            <h2>Detected devices</h2>
+            <div class="head-actions">
+              <button class="btn tiny" id="refresh-devices">Refresh</button>
+              <button class="btn tiny" id="scan-subnet">Scan subnet</button>
+            </div>
+          </header>
+          <div class="panel-body"><ul class="device-list" id="device-list"></ul></div>
+        </article>
+      </section>
+
+      <!-- Quick actions -->
+      <section class="page" id="page-actions" aria-labelledby="h-actions">
+        <h1 class="page-title" id="h-actions">Quick Actions</h1>
+        <p class="page-note">Actions marked <em>soon</em> are not wired up yet.</p>
+        <div class="action-grid">
+          <button class="glass action" data-act="screenshot"><span class="action-icon">▣</span>Screenshot</button>
+          <button class="glass action" data-act="get-clipboard"><span class="action-icon">⎘</span>Get Clipboard</button>
+          <button class="glass action" data-act="set-clipboard"><span class="action-icon">⇩</span>Send Clipboard</button>
+          <button class="glass action" data-act="push-file"><span class="action-icon">↥</span>Push File</button>
+          <button class="glass action" data-act="device-info"><span class="action-icon">☰</span>Device Info</button>
+          <button class="glass action" data-act="restart-adb"><span class="action-icon">↻</span>Restart ADB</button>
+          <button class="glass action" disabled aria-disabled="true"><span class="action-icon">◉</span>Record<em>soon</em></button>
+          <button class="glass action" disabled aria-disabled="true"><span class="action-icon">◍</span>Volume<em>soon</em></button>
+          <button class="glass action" disabled aria-disabled="true"><span class="action-icon">◇</span>App Manager<em>soon</em></button>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="page" id="page-settings" aria-labelledby="h-settings">
+        <h1 class="page-title" id="h-settings">Settings</h1>
+        <article class="glass panel">
+          <header class="panel-head"><h2>Streaming quality</h2></header>
+          <div class="panel-body">
+            <div class="preset-row" id="preset-row" role="radiogroup" aria-label="Quality preset"></div>
+            <p class="muted" id="preset-desc"></p>
+          </div>
+        </article>
+        <article class="glass panel">
+          <header class="panel-head"><h2>Appearance</h2></header>
+          <div class="panel-body">
+            <p class="label">Accent</p>
+            <div class="swatches" id="swatches" role="radiogroup" aria-label="Accent colour"></div>
+            <p class="label">Theme</p>
+            <div class="field actions">
+              <button class="btn" id="theme-dark">Dark</button>
+              <button class="btn" id="theme-light">Light</button>
+            </div>
+          </div>
+        </article>
+        <article class="glass panel">
+          <header class="panel-head"><h2>Connection</h2></header>
+          <div class="panel-body form">
+            <label class="field row">
+              <span>Auto-connect on startup</span>
+              <input type="checkbox" id="auto-connect" class="switch" />
+            </label>
+          </div>
+        </article>
+        <article class="glass panel danger-zone">
+          <header class="panel-head"><h2>Danger zone</h2></header>
+          <div class="panel-body">
+            <button class="btn btn-danger" id="reset-settings">Reset all settings</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- Logs -->
+      <section class="page" id="page-logs" aria-labelledby="h-logs">
+        <h1 class="page-title" id="h-logs">Logs</h1>
+        <article class="glass panel">
+          <header class="panel-head"><h2>Session log</h2><button class="btn tiny" id="clear-logs">Clear</button></header>
+          <div class="panel-body"><pre class="logbox tall" id="logs" aria-live="polite"></pre></div>
+        </article>
+      </section>
+
+      <!-- About -->
+      <section class="page" id="page-about" aria-labelledby="h-about">
+        <h1 class="page-title" id="h-about">About</h1>
+        <article class="glass panel">
+          <div class="panel-body about">
+            <p class="about-mark">◎</p>
+            <p class="device-name">MirrorPy</p>
+            <p class="muted">Android screen mirroring and control, powered by scrcpy.</p>
+            <ul class="kv" id="env-list"></ul>
+            <div class="field actions">
+              <button class="btn" id="open-shots">Open screenshots folder</button>
+              <button class="btn" id="open-config">Open config folder</button>
+            </div>
+            <p class="muted small">
+              Keyboard: <kbd>Esc</kbd> close, <kbd>F11</kbd> fullscreen,
+              <kbd>Ctrl</kbd>+<kbd>1</kbd>–<kbd>6</kbd> sections.
+            </p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

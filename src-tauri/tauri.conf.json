@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MirrorPy",
+  "version": "1.0.0",
+  "identifier": "com.rfannn.mirrorpy",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "MirrorPy",
+        "width": 1080,
+        "height": 720,
+        "minWidth": 900,
+        "minHeight": 640,
+        "resizable": true,
+        "decorations": false,
+        "transparent": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico"],
+    "resources": [
+      "resources/adb.exe",
+      "resources/scrcpy.exe",
+      "resources/scrcpy-server",
+      "resources/AdbWinApi.dll",
+      "resources/AdbWinUsbApi.dll",
+      "resources/SDL2.dll",
+      "resources/avcodec-61.dll",
+      "resources/avformat-61.dll",
+      "resources/avutil-59.dll",
+      "resources/swresample-5.dll",
+      "resources/libusb-1.0.dll"
+    ]
+  }
+}

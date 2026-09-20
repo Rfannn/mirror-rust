@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Permissions the MirrorPy window needs","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-start-dragging","core:window:allow-minimize","core:window:allow-toggle-maximize","core:window:allow-close","opener:allow-open-path","dialog:allow-open"]}}

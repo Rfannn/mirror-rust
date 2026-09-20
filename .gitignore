@@ -1,0 +1,17 @@
+# Rust build output
+src-tauri/target/
+
+# adb and scrcpy binaries. CI fetches them from the Python repo, and locally
+# they are linked in from the neighbouring checkout.
+src-tauri/resources/
+
+# Node, if tooling is ever added
+node_modules/
+
+# Local environment
+.env
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
